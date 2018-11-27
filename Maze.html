@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>回溯法求解迷宫问题</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css"> 
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #fafafa;
+        }
+        h1 {
+            font-size: 40px;
+            text-align: center;
+            height: 80px;
+        }
+		h2 {
+            
+            text-align: center;
+			color: #fff;
+        }
+        h3 {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 400;
+            height: 30px;
+        }
+        .body-left {
+            float: left;
+        }
+        /* 介绍部分 */
+        .introduction {
+            border: 1px solid #666;
+            width: 500px;
+            margin: 10px 30px 0;
+            border-radius: 10px;
+            
+        }
+        .introduction p {
+            font-size: 12px;
+            color: #666;
+            line-height: 16px;
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        /* 迷宫部分 */
+        .maze  {  
+            width: 500px;
+            margin: 30px 30px 0 ;
+            border: 1px solid #666;
+            border-radius: 10px;
+        }
+       
+        .maze h3 {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 400;
+        }
+        .maze table {
+            margin: 0 auto 30px;
+            
+        }
+
+        .maze td {
+            width: 10px;
+            height: 10px;
+            background-color: pink;
+        }
+        .maze .wall {
+            background-color: #000;
+        }
+        .maze .road {
+            background-color: #fff;
+        }
+        .maze .path {
+            background-color: rgb(76, 174, 76);
+        }
+        .maze .try {
+            background-color: lightblue;
+        }
+
+        /* 代码部分 */
+        .body-right {
+            /* border: 1px solid #666; */
+            width: 380px;
+            height: 580px;
+            margin: 10px 30px 0;
+            border-radius: 10px;
+            float: left;
+        }
+        pre {
+            display: block;
+            padding: 9.5px;
+            margin: 0 0 10px;
+            font-size: 13px;
+            line-height: 1.42857143;
+            color: #333;
+            word-break: break-all;
+            word-wrap: break-word;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        pre.highlight {
+            background-color: rgb(76, 174, 76);
+        }
+        
+        /* 控制部分 */
+        .input {
+            border: 1px dashed #666;
+            width: 380px;
+            height: 566px;
+            margin: 10px 30px 0;
+            border-radius: 10px;
+            float: left;
+            padding-top: 100px;
+        }
+        button {
+            margin: 15px auto;
+            padding: 10px 20px;
+            display: block;
+            border: 2px solid lightgray;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        button:hover {
+            opacity: 0.5;
+        }
+        .pau-con {
+            width: 40%;
+            height: 45px;
+            margin: 0 auto;
+        }
+        .pau-con button {
+            float: left;
+            padding: 10px;
+            margin: 0 10px;
+        }
+        .speed {
+            width: 120px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+       <div class="navbar-header">
+         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span> 
+         <span class="icon-bar"></span>
+         </button>
+         <a class="navbar-brand" href="#">算法演示主页</a>
+       </div>
+       <div class="collapse navbar-collapse" id="myNavbar">
+         <h2>回溯法求解迷宫问题</h2> 
+       </div>       
+    </div>
+</nav>
+    <!-- <h1>回溯法求解迷宫问题</h1> -->
+    <!-- 左边 -->
+    <div class="body-left">
+         <!-- 介绍部分 -->
+        <div class="introduction">
+            <h3>问题介绍</h3>
+            <p>给定一个迷宫，指明起点和终点，找出从起点出发到终点的有效可行路径，就是迷宫问题（maze problem）。</p>
+            <h3>求解方法</h3>
+            <p>迷宫可以以二维数组来存储表示。0表示通路，-1表示障碍，1表示走过。这里规定移动可以从上、下、左、右四方方向移动。<br>
+                （1）给定起点和终点<br> 
+                （2）如果起点和终点合法，将起点入栈；<br> 
+                （3）取栈顶元素，求其邻接的未被访问的无障碍结点。求如果有，记其为已访问，并入栈。如果没有则回溯上一结点，具体做法是将当前栈顶元素出栈。
+                其中，求邻接无障碍结点的顺序可任意，实现是以下、左、上、右的顺序求解。<br> 
+                （4）重复步骤（3），直到栈空（没有找到可行路径）或者栈顶元素等于终点（找到第一条可行路径）。
+            </p>
+        </div>
+        <!-- 迷宫部分 10*10-->
+        <div class="maze">
+            <h3>迷宫</h3>
+            <table id="migong" cellspacing=0 cellpadding=0>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+            </table>
+        </div>
+    </div>
+    <!-- 右边 -->
+    <div class="body-right">
+        <div class="code">
+            <h3>关键代码</h3>
+            <div id="coderoot">
+                <pre id="code1">        for( i = 0 ;i < 4; i++) {   </pre>
+                <pre id="code2">            a=x+move[i][0];         </pre>
+                <pre id="code3">            b=y+move[i][1];         </pre>
+                <pre id="code4">            if(maze[a][b]==0){       </pre>
+                <pre id="code5">            maze[a][b]=1;          </pre>
+                <pre id="code6">            path.push([a,b]);       </pre>
+                <pre id="code7">            if(a==14&&b==14)  return;   </pre>
+                <pre id="code8">            dfs(a,b);                   </pre>
+                <pre id="code9">            shuzu[a][b]=0; }             </pre>
+                <pre id="code10">       }                         </pre>
+            </div>  
+        </div>  
+    </div>
+    <!-- 控制部分 -->
+    <div class="input">
+        <button id="start">开始演示</button>
+        <div class="pau-con">
+            <button id="pause" >暂停</button>
+            <button id="continue">继续</button>
+        </div>
+        <div class="speed">
+            <button id="speed1" >X1/2 倍速</button>
+            <button id="speed2">X2 倍速</button>
+        </div>
+        
+    </div>
+    <script>
+        //迷宫数组
+        shuzu=[
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+            [-1, 0, 0, 0, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+            [-1,-1, 0,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+            [-1,-1, 0,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+            [-1,-1, 0,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+            [-1,-1, 0,-1, 0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+            [-1,-1, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1,-1,-1],
+            [-1, 0, 0,-1, 0,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1],
+            [-1,-1, 0,-1, 0,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1],
+            [-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1],
+            [-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1],
+            [-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1],
+            [-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1, 0,-1,-1,-1,-1],
+            [-1,-1,-1,-1, 0,-1,-1,-1,-1,-1,-1, 0, 0, 0, 0,-1],
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, 10,-1],
+            [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+        ]
+        animlist=new Array();
+        //移动方向
+        var move=[
+            [1,0],    
+            [0,1],    
+            [-1,0],   
+            [0,-1]    
+        ]
+        //路径
+        var path=[];
+        var key=[];
+        //栈顶指针
+        var top=0;
+
+        //dom操作
+        var start=document.getElementById("start");
+        var pause=document.getElementById("pause");
+        var contin=document.getElementById("continue");
+        var speed1=document.getElementById("speed1");
+        var speed2=document.getElementById("speed2");
+
+        var migong=document.getElementById("migong");
+        var tr=migong.getElementsByTagName("tr");
+        var code= document.getElementById("coderoot").getElementsByTagName("pre");
+
+        function renderMaze(){
+            for(var i=0;i<tr.length;i++){
+                td=tr[i].getElementsByTagName("td");
+                // console.log(td);
+                for(var j=0;j<td.length;j++){
+                    if(shuzu[i][j]==-1){
+                        td[j].setAttribute("class","wall");
+                    }
+                    if(shuzu[i][j]==0){
+                        td[j].setAttribute("class","road");
+                    }
+                    if(shuzu[i][j]==1){
+                        td[j].setAttribute("class","path");
+                    }
+                    if(shuzu[i][j]==10){
+                        td[j].setAttribute("class","try");
+                    }
+                    
+                }
+                // console.log("render....");
+            }
+        }
+      
+
+        var kk=[];
+
+        function dfs(x,y) {
+           
+            var a=0, b=0;
+            for(var i=0;i<4;i++){//遍历4个方向 
+                a=x+move[i][0];//计算下个格子的坐标 
+                b=y+move[i][1];
+                if(shuzu[a][b]==0){//如果下个格子可以走 
+                shuzu[a][b]=1;//将走过的路标记为1
+                path.push([a,b]); 
+                key.push([a,b]);
+                // console.log("try");
+                if(a==14&&b==14)  return;
+                else{
+            
+        
+                    dfs(a,b);//否则就通过调用走到下一个格子 
+                } 
+                if(key[key.length-1]!=[13,14]){
+                    var k=key.pop();
+                    kk.push(k);
+                    console.log(k);
+                }
+                
+                shuzu[a][b]=0;//调用回来不论是前方格子不能走，还是输出完了，都要将走过的路径抹去
+                }
+                
+                
+            }
+            
+        }
+        
+            
+        // function highlightcode(code){
+        //     i1++;
+        //     i1=i1%10; 
+        //     for(var j=0;j<10;j++){
+        //         code[j].setAttribute("class"," ");
+        //     }
+        //     code[i1].setAttribute("class","highlight");
+        //     console.log(i1);
+        // }
+        // i1=0;
+        
+        // console.log(code);
+    
+        // time = setInterval('highlightcode(code)', 200);
+        
+        
+       // renderMaze(shuzu);
+        start.onclick=startf;
+        pause.onclick=pausef;
+        contin.onclick=startf;
+        speed1.onclick=speed1f;
+        speed2.onclick=speed2f;
+        renderMaze();
+        dfs(1,1);
+        var i=0;
+        var j=0;
+        var time=1000;
+        // timer=setInterval("renderpath()",1000);
+        // timer=setInterval("codehigh()",500);
+      // timer=setInterval("render()",1000);
+       //anintime=0;
+        //time=setInterval("render(animlist)",1000);
+        // function render(animlist){   
+        //     renderMaze(animlist[anintime]);
+        //     animlist++;
+        //     console.log(anintime);
+        //     console.log(animlist[anintime]);
+        // }
+        
+        
+
+        function renderpath(){
+            if(i>=path.length-1||path[i][0]==14&&path[i][1]==14) return;
+            animtd=tr[path[i][0]].getElementsByTagName("td");
+            animtd[path[i][1]].setAttribute("class","path");  
+            i++;
+        }
+    
+
+
+        function codehighlight1(){
+            for(var j=0;j<10;j++){
+                code[j].setAttribute("class"," ");    
+            }
+            for(var i=0;i<6;i++){
+                code[i].setAttribute("class","highlight");
+            }
+        }
+        function codehighlight2(){
+            for(var j=0;j<10;j++){
+                code[j].setAttribute("class"," ");    
+            }
+            for(var i=6;i<10;i++){
+                code[i].setAttribute("class","highlight");
+            }
+        }
+
+        function codehigh(){
+            if(i>=path.length-1||path[i][0]==14&&path[i][1]==14) return;
+            if (j%2==0){
+                codehighlight1();
+            }else{
+                codehighlight2();
+            }
+            j++;
+        }
+
+        function startf(){
+            timer1=setInterval("renderpath()",time);
+            timer2=setInterval("codehigh()",time/2);
+        }  
+
+        function pausef(){
+            clearInterval(timer1);
+            clearInterval(timer2);
+        }
+        
+        function speed1f(){
+            pausef();
+            time*=2;
+            startf();
+        }
+
+        function speed2f(){
+            pausef();
+            time/=2;
+            startf();
+        }
+        
+
+       
+        
+        
+        
+        
+
+       
+    </script>
+</body>
+</html>
